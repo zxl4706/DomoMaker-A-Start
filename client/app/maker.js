@@ -8,12 +8,27 @@ const handleDomo = (e) => {
         return false;
     }
 
+    const temp = $("#domoForm").serializeArray();
+
     sendAjax('POST', $("#domoForm").attr("action"), $("#domoForm").serialize(), function() {
-        loadDomosFromServer();
+        loadDomosFromServer(temp[3].value);
     });
 
     return false;
 };
+
+const handleDelDomo = (e) => {
+    e.preventDefault();
+
+    const temp = $("#domoForm").serializeArray();
+    console.log(temp[3].value);
+
+    sendAjax('POST', $(e.target).attr("action"), $(e.target).serialize(), () => {
+        loadDomosFromServer(temp[3].value);
+    });
+
+    return false;
+}
 
 const DomoForm = (props) => {
     return (
@@ -52,6 +67,18 @@ const DomoList = function(props) {
                 <h3 className="domoName"> Name: {domo.name} </h3>
                 <h3 className="domoAge"> Age: {domo.age} </h3>
                 <h3 className="domoLevel"> Level: {domo.level} </h3>
+                <form name="delDomoForm"
+                    onSubmit={handleDelDomo}
+                    action="/delDomo"
+                    method="POST"
+                    className="delDomoForm"
+                >
+                    <input type="hidden" name="name" value={domo.name} />
+                    <input type="hidden" name="age" value={domo.age} />
+                    <input type="hidden" name="level" value={domo.level} />
+                    <input type="hidden" name="_csrf" value={props.csrf} />
+                    <input className="delDomoSubmit" type="submit" value="Delete Domo"/>
+                </form>
             </div>
         );
     });
@@ -63,16 +90,13 @@ const DomoList = function(props) {
     );
 };
 
-const loadDomosFromServer = () => {
+const loadDomosFromServer = (csrf) => {
     sendAjax("GET", '/getDomos', null, (data) => {
         ReactDOM.render(
-            <DomoList domos={data.domos} />, document.querySelector("#domos")
+            <DomoList domos={data.domos} csrf={csrf}/>, 
+            document.querySelector("#domos")
         );
     });
-};
-
-const removeDomo = () => {
-    sendAjax("GET", '/removeDomos');
 };
 
 const setup = function(csrf) {
@@ -84,7 +108,7 @@ const setup = function(csrf) {
         <DomoList domos={[]} />, document.querySelector("#domos")
     );
 
-    loadDomosFromServer();
+    loadDomosFromServer(csrf);
 };
 
 const getToken = () => {

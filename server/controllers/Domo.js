@@ -56,7 +56,26 @@ const getDomos = (request, response) => {
   });
 };
 
+const delDomo = (req, res) => {
+  const condition = {
+    name: req.body.name,
+    age: req.body.age,
+    level: req.body.level,
+    owner: req.session.account._id,
+  };
+
+  return Domo.DomoModel.deleteOne(condition, (err) => {
+    if (err) {
+      console.log(err);
+      return res.status(400).json({ error: 'An error occurred' });
+    }
+
+    return res.json({ success: 'Deleted' });
+  });
+};
+
 
 module.exports.makerPage = makerPage;
 module.exports.getDomos = getDomos;
 module.exports.make = makeDomo;
+module.exports.delDomo = delDomo;
